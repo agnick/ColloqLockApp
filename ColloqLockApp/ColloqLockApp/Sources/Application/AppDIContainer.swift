@@ -21,7 +21,9 @@ final class AppDIContainer {
     }()
     
     lazy var colloquiumJoinFactory: ColloquiumJoinFactory = {
-        ColloquiumJoinFactoryImpl(externalDeps: ColloquiumJoinExternalDeps())
+        ColloquiumJoinFactoryImpl(externalDeps: ColloquiumJoinExternalDeps(
+            appRouter: appRouter, colloqFactory: colloqFactory
+        ))
     }()
     
     lazy var colloquiumCreationFactory: ColloqCreationFactory = {
@@ -37,27 +39,25 @@ final class AppDIContainer {
             colloqCreationFactory: colloquiumCreationFactory
         ))
     }()
-
+    
     lazy var summarizeFactory: SummarizeFactory = {
         SummarizeFactoryImpl(
             externalDeps: SummarizeExternalDeps(
                 appRouter: appRouter,
                 profileFactory: profileFactory
+            ))
+    }()
+    
+    lazy var loadingFactory: LoadingFactory = {
+        LoadingFactoryImpl(externalDeps: LoadingExternalDeps(
+            appRouter: appRouter,
+            summarizeFactory: summarizeFactory
         ))
     }()
-        
-        lazy var loadingFactory: LoadingFactory = {
-            LoadingFactoryImpl(externalDeps: LoadingExternalDeps(
-                appRouter: appRouter,
-                summarizeFactory: summarizeFactory
-            ))
-        }()
     
     lazy var colloqFactory: ColloqFactory = {
         ColloqFactoryImpl(externalDeps: ColloqExternalDeps(
-            authService: authService,
-            appRouter: appRouter,
-            authorizationFactory: authorizationFactory
+            appRouter: appRouter
         ))
     }()
 }

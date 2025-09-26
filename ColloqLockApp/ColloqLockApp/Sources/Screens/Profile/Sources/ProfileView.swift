@@ -106,7 +106,7 @@ struct ProfileView<ViewModel: ProfileViewModel>: View {
     }
     
     private var avatar: some View {
-        Images.SystemImages.hourglass // TODO: avatar вернуть
+        Images.LocalImages.avatar
             .resizable()
             .frame(width: Constants.avatarSize, height: Constants.avatarSize)
             .clipShape(Circle())
@@ -170,7 +170,7 @@ struct ProfileView<ViewModel: ProfileViewModel>: View {
     private func createCell(name: String, date: String) -> some View {
         VStack(alignment: .center) {
             HStack {
-                Images.SystemImages.arrowRight // TODO: colloqItem вернуть
+                Images.LocalImages.colloqItem
                     .resizable()
                     .frame(width: Constants.colloqItemSize, height: Constants.colloqItemSize)
                 

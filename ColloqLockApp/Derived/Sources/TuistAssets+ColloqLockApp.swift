@@ -20,6 +20,18 @@
 public enum ColloqLockAppAsset: Sendable {
   public enum Assets {
   public static let accentColor = ColloqLockAppColors(name: "AccentColor")
+    public static let accentColor = ColloqLockAppColors(name: "AccentColor")
+    public static let backgroundPrimary = ColloqLockAppColors(name: "BackgroundPrimary")
+    public static let backgroundSecondary = ColloqLockAppColors(name: "BackgroundSecondary")
+    public static let buttonPrimary = ColloqLockAppColors(name: "ButtonPrimary")
+    public static let buttonStroke = ColloqLockAppColors(name: "ButtonStroke")
+    public static let textPrimary = ColloqLockAppColors(name: "TextPrimary")
+    public static let textSecondary = ColloqLockAppColors(name: "TextSecondary")
+    public static let avatar = ColloqLockAppImages(name: "avatar")
+    public static let colloqItem = ColloqLockAppImages(name: "colloqItem")
+    public static let creeper = ColloqLockAppImages(name: "creeper")
+    public static let google = ColloqLockAppImages(name: "google")
+    public static let mail = ColloqLockAppImages(name: "mail")
   }
   public enum PreviewAssets {
   }
@@ -76,6 +88,58 @@ public extension SwiftUI.Color {
   init(asset: ColloqLockAppColors) {
     let bundle = Bundle.module
     self.init(asset.name, bundle: bundle)
+  }
+}
+#endif
+
+public struct ColloqLockAppImages: Sendable {
+  public let name: String
+
+  #if os(macOS)
+  public typealias Image = NSImage
+  #elseif os(iOS) || os(tvOS) || os(watchOS) || os(visionOS)
+  public typealias Image = UIImage
+  #endif
+
+  public var image: Image {
+    let bundle = Bundle.module
+    #if os(iOS) || os(tvOS) || os(visionOS)
+    let image = Image(named: name, in: bundle, compatibleWith: nil)
+    #elseif os(macOS)
+    let image = bundle.image(forResource: NSImage.Name(name))
+    #elseif os(watchOS)
+    let image = Image(named: name)
+    #endif
+    guard let result = image else {
+      fatalError("Unable to load image asset named \(name).")
+    }
+    return result
+  }
+
+  #if canImport(SwiftUI)
+  @available(iOS 13.0, tvOS 13.0, watchOS 6.0, macOS 10.15, visionOS 1.0, *)
+  public var swiftUIImage: SwiftUI.Image {
+    SwiftUI.Image(asset: self)
+  }
+  #endif
+}
+
+#if canImport(SwiftUI)
+@available(iOS 13.0, tvOS 13.0, watchOS 6.0, macOS 10.15, visionOS 1.0, *)
+public extension SwiftUI.Image {
+  init(asset: ColloqLockAppImages) {
+    let bundle = Bundle.module
+    self.init(asset.name, bundle: bundle)
+  }
+
+  init(asset: ColloqLockAppImages, label: Text) {
+    let bundle = Bundle.module
+    self.init(asset.name, bundle: bundle, label: label)
+  }
+
+  init(decorative asset: ColloqLockAppImages) {
+    let bundle = Bundle.module
+    self.init(decorative: asset.name, bundle: bundle)
   }
 }
 #endif

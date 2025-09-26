@@ -23,7 +23,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
                 let vc = diContainer.authorizationFactory.makeAuthorizationScreen()
                 diContainer.appRouter.setRoot(vc, animated: true)
             case .signedIn:
-                let vc = diContainer.summarizeFactory.makeSummarizeScreen(testId: "2oxnecb2uxuGbkPAbTwZ") //diContainer.profileFactory.makeProfileScreen()
+                let vc = diContainer.profileFactory.makeProfileScreen()
+                //diContainer.summarizeFactory.makeSummarizeScreen(testId: "2oxnecb2uxuGbkPAbTwZ")
                 diContainer.appRouter.setRoot(vc, animated: true)
             }
         }

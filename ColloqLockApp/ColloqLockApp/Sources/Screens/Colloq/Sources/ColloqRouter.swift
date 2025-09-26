@@ -7,9 +7,8 @@ final class ColloqRouterImpl: ColloqRouter {
     
     // MARK: - Init
     
-    init(appRouter: AppRouter, authorizationFactory: AuthorizationFactory) {
+    init(appRouter: AppRouter) {
         self.appRouter = appRouter
-        self.authorizationFactory = authorizationFactory
     }
     
     // MARK: - Public Methods
@@ -17,5 +16,4 @@ final class ColloqRouterImpl: ColloqRouter {
     // MARK: - Private Properties
     
     private let appRouter: AppRouter
-    private let authorizationFactory: AuthorizationFactory
 }

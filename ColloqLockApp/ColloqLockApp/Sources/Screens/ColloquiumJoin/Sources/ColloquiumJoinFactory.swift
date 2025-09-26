@@ -17,7 +17,8 @@ struct ColloquiumJoinFactoryImpl: ColloquiumJoinFactory {
     
     func makeColloquiumJoinScreen() -> UIViewController {
         let interactor = ColloquiumJoinInteractorImpl()
-        let viewModel = ColloquiumJoinViewModelImpl(interactor: interactor)
+        let router = ColloquiumJoinRouterImpl(appRouter: externalDeps.appRouter, colloqFactory: externalDeps.colloqFactory)
+        let viewModel = ColloquiumJoinViewModelImpl(interactor: interactor, router: router)
         let rootView = ColloquiumJoinView(viewModel: viewModel)
         let viewController = UIHostingController(rootView: rootView)
         return viewController

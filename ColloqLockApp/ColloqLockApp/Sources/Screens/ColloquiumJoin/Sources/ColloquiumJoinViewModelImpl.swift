@@ -12,8 +12,9 @@ final class ColloquiumJoinViewModelImpl: ColloquiumJoinViewModel {
     
     // MARK: - Init
     
-    init(interactor: ColloquiumJoinInteractor) {
+    init(interactor: ColloquiumJoinInteractor, router: ColloquiumJoinRouter) {
         self.interactor = interactor
+        self.router = router
     }
     
     // MARK: - Public Methods
@@ -32,7 +33,7 @@ final class ColloquiumJoinViewModelImpl: ColloquiumJoinViewModel {
         Task {
             do {
                 let colloquiumId = try await interactor.joinColloquium(with: code)
-                print(String(format: ColloquiumJoinStrings.successfullyJoinedFormat, colloquiumId)) 
+                router.routeTo(.colloquium(colloquiumId))
             } catch let error as ColloquiumJoinError {
                 errorMessage = error.title
                 isErrorMessagePresented = true
@@ -48,4 +49,5 @@ final class ColloquiumJoinViewModelImpl: ColloquiumJoinViewModel {
     // MARK: - Private Properties
     
     private let interactor: ColloquiumJoinInteractor
+    private let router: ColloquiumJoinRouter
 }
