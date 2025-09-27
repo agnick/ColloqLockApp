@@ -32,13 +32,14 @@ final class AppDIContainer {
     }()
     
     lazy var profileFactory: ProfileFactory = {
-        ProfileFactoryImpl(externalDeps: ProfileExternalDeps(
+        let userId = authService.currentUserID
+        return ProfileFactoryImpl(externalDeps: ProfileExternalDeps(
             authService: authService,
             appRouter: appRouter,
             authorizationFactory: authorizationFactory,
             colloquiumJoinFactory: colloquiumJoinFactory,
             colloqCreationFactory: colloquiumCreationFactory
-        ))
+        ), userId: userId!)
     }()
     
     lazy var summarizeFactory: SummarizeFactory = {

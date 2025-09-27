@@ -9,8 +9,7 @@ final class ColloqViewModelImpl: ColloqViewModel {
     @Published var answers: [ColloqAnswerModel] = []
     @Published var isLoading: Bool = true
     @Published var remainingTime: TimeInterval = 3600
-    
-    private var id: String
+
     private let quizDuration: TimeInterval = 3600
     private var startDate: Date?
     private var timer: Timer?
@@ -25,10 +24,9 @@ final class ColloqViewModelImpl: ColloqViewModel {
     
     // MARK: - Init
     
-    init(interactor: ColloqInteractor, router: ColloqRouter, id: String) {
+    init(interactor: ColloqInteractor, router: ColloqRouter) {
         self.interactor = interactor
         self.router = router
-        self.id = id
     }
     
     // MARK: - Public Methods
@@ -73,7 +71,7 @@ final class ColloqViewModelImpl: ColloqViewModel {
                 guard let colloqQuestions = try await interactor.loadQuestions() else { return }
                 questions = colloqQuestions
 
-                let savedAnswers = try await interactor.loadAnswers(for: id)
+                let savedAnswers = try await interactor.loadAnswers()
                 
                 self.answers = if let savedAnswers {
                     savedAnswers
@@ -102,7 +100,7 @@ final class ColloqViewModelImpl: ColloqViewModel {
         let answer = answers[index]
         Task {
             do {
-                try await interactor.saveAnswer(for: id, index: index, answer: answer)
+                try await interactor.saveAnswer(index: index, answer: answer)
             } catch {
                 print("Failed to save answer: \(error)")
             }

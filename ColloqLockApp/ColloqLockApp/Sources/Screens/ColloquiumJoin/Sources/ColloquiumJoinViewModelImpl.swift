@@ -6,12 +6,14 @@ final class ColloquiumJoinViewModelImpl: ColloquiumJoinViewModel {
     // MARK: - Internal Properties
     
     @Published var code: String = ""
+    var userId: String
     
     // MARK: - Init
     
-    init(interactor: ColloquiumJoinInteractor, router: ColloquiumJoinRouter) {
+    init(interactor: ColloquiumJoinInteractor, router: ColloquiumJoinRouter, userId: String) {
         self.interactor = interactor
         self.router = router
+        self.userId = userId
     }
     
     // MARK: - Public Methods
@@ -25,7 +27,7 @@ final class ColloquiumJoinViewModelImpl: ColloquiumJoinViewModel {
         joinColloquiumTask = Task {
             do {
                 let colloqId = try await interactor.validateColloqiumCode(code)
-                router.routeTo(.colloquium(colloqId))
+                router.routeTo(.colloquium(colloqId), userId: userId, testId: colloqId)
             } catch let error as ColloquiumJoinError {
                 ToastService.showError(error.description)
                 print(error)

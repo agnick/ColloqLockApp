@@ -2,88 +2,111 @@ import FirebaseFirestore
 import FirebaseAuth
 
 protocol ColloqService {
-    func fetchQuestions() async throws -> [ColloqQuestionModel]
-    func fetchAnswers(userId: String) async throws -> [ColloqAnswerModel]?
-    func saveAnswer(userId: String, index: Int, answer: ColloqAnswerModel) async throws
+    func fetchTestQuestions(testId: String) async throws -> [TestQuestionDto]
+    func fetchOpenQuestions(testId: String) async throws -> [OpenQuestionDto]
+    func fetchAnswers(userId: String, testId: String) async throws -> AnswersDto?
+    func saveAnswer(userId: String, testId: String, testAnswer: TestAnswerDto?, openAnswer: OpenAnswerDto?) async throws
 }
 
 final class ColloqServiceImpl: ColloqService {
     
     private let db = Firestore.firestore()
+
+    // MARK: - Fetch questions
     
-    // MARK: - Questions
-    
-    func fetchQuestions() async throws -> [ColloqQuestionModel] {
-        let snapshot = try await db.collection("questions").getDocuments()
-        let questions: [TestQuestionDto] = try snapshot.documents.compactMap { doc in
-            try doc.data(as: TestQuestionDto.self)
-        }
-        
-        return questions
-    }
-    
-    // MARK: - Answers
-    
-    func fetchAnswers(userId: String) async throws -> [ColloqAnswerModel]? {
-        let doc = try await db.collection("answers").document(userId).getDocument()
-        
+    func fetchTestQuestions(testId: String) async throws -> [TestQuestionDto] {
+        let doc = try await db.collection("tests").document(testId).getDocument()
         guard let data = doc.data(),
-              let answersArray = data["answers"] as? [[String: Any]] else {
-            return nil
-        }
+              let questionsArray = data["testQuestions"] as? [[String: Any]] else { return [] }
         
-        return answersArray.compactMap { dict in
-            guard let type = dict["type"] as? String else { return nil }
-            
-            switch type {
-            case "open":
-                return .open(dict["value"] as? String ?? "")
-            case "pick2":
-                return .pick2(dict["value"] as? Int)
-            case "pick4":
-                if let values = dict["value"] as? [Int] {
-                    return .pick4(Set(values))
-                }
-                return .pick4([])
-            default:
-                return nil
-            }
+        return questionsArray.compactMap { dict in
+            guard let id = dict["id"] as? String,
+                  let question = dict["question"] as? String,
+                  let options = dict["options"] as? [String],
+                  let correctOption = dict["correctOption"] as? Int else { return nil }
+            return TestQuestionDto(id: id, question: question, options: options, correctOption: correctOption)
         }
     }
     
-    func saveAnswer(userId: String, index: Int, answer: ColloqAnswerModel) async throws {
-        let docRef = db.collection("answers").document(userId)
+    func fetchOpenQuestions(testId: String) async throws -> [OpenQuestionDto] {
+        let doc = try await db.collection("tests").document(testId).getDocument()
+        guard let data = doc.data(),
+              let questionsArray = data["openQuestions"] as? [[String: Any]] else { return [] }
+        
+        return questionsArray.compactMap { dict in
+            guard let id = dict["id"] as? String,
+                  let question = dict["question"] as? String else { return nil }
+            return OpenQuestionDto(id: id, question: question)
+        }
+    }
+    
+    // MARK: - Fetch answers
+    
+    func fetchAnswers(userId: String, testId: String) async throws -> AnswersDto? {
+        let snapshot = try await db.collection("userTests")
+            .whereField("testId", isEqualTo: testId)
+            .whereField("userId", isEqualTo: userId)
+            .getDocuments()
+        
+        guard let doc = snapshot.documents.first,
+              let answersDict = doc.data()["answers"] as? [String: Any] else { return nil }
+        
+        let testAnswersArray = answersDict["testAnswers"] as? [[String: Any]] ?? []
+        let testAnswers = testAnswersArray.compactMap { dict -> TestAnswerDto? in
+            guard let questionId = dict["questionId"] as? String else { return nil }
+            let optionAnswer = dict["optionAnswer"] as? Int
+            return TestAnswerDto(questionId: questionId, optionAnswer: optionAnswer)
+        }
+        
+        let openAnswersArray = answersDict["openAnswers"] as? [[String: Any]] ?? []
+        let openAnswers = openAnswersArray.compactMap { dict -> OpenAnswerDto? in
+            guard let questionId = dict["questionId"] as? String else { return nil }
+            let answer = dict["answer"] as? String
+            return OpenAnswerDto(questionId: questionId, answer: answer)
+        }
+        
+        return AnswersDto(testAnswers: testAnswers, openAnswers: openAnswers)
+    }
+    
+    // MARK: - Save answers
+    
+    func saveAnswer(userId: String, testId: String, testAnswer: TestAnswerDto?, openAnswer: OpenAnswerDto?) async throws {
+        let docRef = db.collection("userTests").document(userId)
         let snapshot = try await docRef.getDocument()
         
-        var existingAnswers: [[String: Any]] = []
+        var existingAnswers: [String: Any] = [:]
         if let data = snapshot.data(),
-           let stored = data["answers"] as? [[String: Any]] {
+           let stored = data["answers"] as? [String: Any] {
             existingAnswers = stored
         }
         
-        let mapped: [String: Any]
-        switch answer {
-        case .open(let text):
-            mapped = ["questionIndex": index, "type": "open", "value": text]
-        case .pick2(let value):
-            mapped = ["questionIndex": index, "type": "pick2", "value": value as Any]
-        case .pick4(let values):
-            mapped = ["questionIndex": index, "type": "pick4", "value": Array(values)]
+        // testAnswers
+        if let testAnswer {
+            var testAnswers = existingAnswers["testAnswers"] as? [[String: Any]] ?? []
+            if let index = testAnswers.firstIndex(where: { ($0["questionId"] as? String) == testAnswer.questionId }) {
+                testAnswers[index] = ["questionId": testAnswer.questionId, "optionAnswer": testAnswer.optionAnswer as Any]
+            } else {
+                testAnswers.append(["questionId": testAnswer.questionId, "optionAnswer": testAnswer.optionAnswer as Any])
+            }
+            existingAnswers["testAnswers"] = testAnswers
         }
         
-        if let existingIndex = existingAnswers.firstIndex(where: { ($0["questionIndex"] as? Int) == index }) {
-            existingAnswers[existingIndex] = mapped
-        } else {
-            existingAnswers.append(mapped)
+        // openAnswers
+        if let openAnswer {
+            var openAnswers = existingAnswers["openAnswers"] as? [[String: Any]] ?? []
+            if let index = openAnswers.firstIndex(where: { ($0["questionId"] as? String) == openAnswer.questionId }) {
+                openAnswers[index] = ["questionId": openAnswer.questionId, "answer": openAnswer.answer as Any]
+            } else {
+                openAnswers.append(["questionId": openAnswer.questionId, "answer": openAnswer.answer as Any])
+            }
+            existingAnswers["openAnswers"] = openAnswers
         }
         
         try await docRef.setData([
             "answers": existingAnswers,
-            "timestamp": FieldValue.serverTimestamp()
-        ])
+            "submittedAt": FieldValue.serverTimestamp(),
+            "testId": testId,
+            "userId": userId
+        ], merge: true)
     }
 }
-
-
-
-

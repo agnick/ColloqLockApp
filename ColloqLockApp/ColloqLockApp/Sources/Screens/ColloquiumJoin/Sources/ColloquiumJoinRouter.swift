@@ -1,6 +1,6 @@
 @MainActor
 protocol ColloquiumJoinRouter {
-    func routeTo(_ destination: ColloquiumJoinRouterDestination)
+    func routeTo(_ destination: ColloquiumJoinRouterDestination, userId: String, testId: String)
 }
 
 enum ColloquiumJoinRouterDestination {
@@ -21,10 +21,10 @@ final class ColloquiumJoinRouterImpl: ColloquiumJoinRouter {
     
     // MARK: - Public Methods
     
-    func routeTo(_ destination: ColloquiumJoinRouterDestination) {
+    func routeTo(_ destination: ColloquiumJoinRouterDestination, userId: String, testId: String) {
         switch destination {
         case .colloquium(let colloquiumId):
-            let colloqVC = colloqFactory.makeColloqScreen(id: colloquiumId)
+            let colloqVC = colloqFactory.makeColloqScreen(userId: userId, testId: testId)
             appRouter.setRoot(colloqVC, animated: true)
         }
     }
