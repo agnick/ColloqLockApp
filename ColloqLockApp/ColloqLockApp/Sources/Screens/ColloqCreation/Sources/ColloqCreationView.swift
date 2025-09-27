@@ -14,6 +14,8 @@ struct ColloqCreationView<ViewModel: ColloqCreationViewModel>: View {
     // MARK: - Body
     
     var body: some View {
-        
+        VStack {
+            
+        }
     }
 }

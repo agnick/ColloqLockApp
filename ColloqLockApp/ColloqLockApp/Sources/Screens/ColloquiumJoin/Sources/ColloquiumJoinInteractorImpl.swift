@@ -9,7 +9,7 @@ final class ColloquiumJoinInteractorImpl: ColloquiumJoinInteractor {
     // MARK: - Mock Data
     
     private let mockColloquiums = [
-        "123456": "colloquium_1",
+        "1234": "colloquium_1",
         "ABCDEF": "colloquium_2",
         "789012": "colloquium_3"
     ]

@@ -20,7 +20,7 @@ struct ProfileFactoryImpl: ProfileFactory {
             appRouter: externalDeps.appRouter,
             authorizationFactory: externalDeps.authorizationFactory,
             colloquiumJoinFactory: externalDeps.colloquiumJoinFactory,
-            colloqCreationFactory: externalDeps.colloqCreationFactory,
+            colloqCreationFactory: externalDeps.colloqCreationFactory
         )
         let interactor = ProfileInteractorImpl(authService: externalDeps.authService)
         let viewModel = ProfileViewModelImpl(interactor: interactor, router: router)

@@ -1,16 +1,12 @@
 import Foundation
 
 protocol ColloqInteractor {
-    func loadQuestions() -> [ColloqQuestionModel]
+    func loadQuestions() async throws -> [ColloqQuestionModel]?
 }
 
 final class ColloqInteractorImpl: ColloqInteractor {
     
-    init(authService: AuthService) {
-        self.authService = authService
-    }
-    
-    func loadQuestions() -> [ColloqQuestionModel] {
+    func loadQuestions() async throws -> [ColloqQuestionModel]? {
         return [
             ColloqQuestionModel(type: .open, text: "Расскажи о себе", options: nil),
             ColloqQuestionModel(type: .pick2, text: "Выбери один вариант", options: ["Вариант 1", "Вариант 2"]),
@@ -58,6 +54,4 @@ final class ColloqInteractorImpl: ColloqInteractor {
     func submitAnswers(_ answers: [ColloqAnswerModel]) async throws {
 
     }
-    
-    private let authService: AuthService
 }

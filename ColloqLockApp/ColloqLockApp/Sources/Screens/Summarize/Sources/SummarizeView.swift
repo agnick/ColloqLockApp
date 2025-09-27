@@ -22,7 +22,7 @@ struct SummarizeView<ViewModel: SummarizeViewModel>: View {
                 VStack {
                     HStack(alignment: .center) {
                         Button(action: {}) {
-                            Images.SystemImages.leftArrow
+                            Images.SystemImages.chevronLeft
                                 .foregroundStyle(Colors.buttonStroke)
                         }
                         .frame(width: Layout.Button.size, height: Layout.Button.size)
@@ -106,7 +106,7 @@ private struct TestQuestionCardView: View {
                         .font(.system(size: Layout.mediumFontSize))
                         .foregroundStyle(Colors.textPrimary)
                     Spacer()
-                    Images.SystemImages.rightArrow
+                Images.SystemImages.chevronRight
                         .foregroundStyle(Colors.textPrimary)
                 }
             .opacity(flipped ? 0 : 1)

@@ -8,7 +8,10 @@ protocol ColloqViewModel: ObservableObject {
     var currentQuestion: String { get }
     var currentType: ColloqQuestionType { get }
     var answers: [ColloqAnswerModel] { get set }
+    var isLoading: Bool { get }
+    var remainingTime: TimeInterval { get }
     
+    func onAppear()
     func goNext()
     func goBack()
     func goToIndex(index: Int)
@@ -31,17 +34,29 @@ struct ColloqView<ViewModel: ColloqViewModel>: View {
     
     var body: some View {
         ZStack {
+            
             LinearGradient.appBackground
                 .ignoresSafeArea()
                 .onTapGesture {
                     UIApplication.shared.hideKeyboard()
                 }
             
-            VStack {
-                header
-                progressBar
-                questionView(for: viewModel.currentQuestion, type: viewModel.currentType)
-                footer
+            if viewModel.isLoading {
+                ProgressView()
+                    .tint(Colors.accent)
+            } else {
+                VStack {
+                    header
+                    progressBar
+                    questionView(for: viewModel.currentQuestion, type: viewModel.currentType)
+                    footer
+                }
+            }
+        }
+        .onAppear {
+            Task {
+                viewModel.onAppear()
+                print(viewModel.questions.count, viewModel.answers.count)
             }
         }
     }
@@ -67,7 +82,6 @@ struct ColloqView<ViewModel: ColloqViewModel>: View {
             timer
                 .padding(.trailing, 20)
         }
-        .padding(.top, 20)
     }
     
     private var progressBar: some View {
@@ -122,7 +136,7 @@ struct ColloqView<ViewModel: ColloqViewModel>: View {
                 .frame(width: 14, height: 22)
                 .foregroundColor(Colors.buttonStroke)
                 .padding(.trailing, 1)
-            Text("23:59")
+            Text(formatTime(viewModel.remainingTime))
                 .font(.system(size: 17, weight: .bold))
                 .foregroundStyle(Colors.buttonStroke)
                 .padding(.leading, 1)
@@ -361,6 +375,12 @@ struct ColloqView<ViewModel: ColloqViewModel>: View {
         }
     }
     
+    private func formatTime(_ interval: TimeInterval) -> String {
+        let minutes = Int(interval) / 60
+        let seconds = Int(interval) % 60
+        return String(format: "%02d:%02d", minutes, seconds)
+    }
+    
     @ViewBuilder
     private func questionView(for text: String, type: ColloqQuestionType) -> some View {
         switch type {
@@ -420,6 +440,7 @@ struct ColloqView<ViewModel: ColloqViewModel>: View {
                 options: viewModel.questions[viewModel.currentIndex].options ?? []
             )
         }
+        
     }
     
     // MARK: - Constants
