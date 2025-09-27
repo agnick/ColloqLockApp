@@ -1,6 +1,6 @@
 @MainActor
 protocol ColloqRouter {
-
+    func dismiss()
 }
 
 final class ColloqRouterImpl: ColloqRouter {
@@ -12,6 +12,10 @@ final class ColloqRouterImpl: ColloqRouter {
     }
     
     // MARK: - Public Methods
+    
+    func dismiss() {
+        appRouter.close(animated: true)
+    }
 
     // MARK: - Private Properties
     

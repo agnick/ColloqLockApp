@@ -6,9 +6,6 @@ final class ColloquiumJoinViewModelImpl: ColloquiumJoinViewModel {
     // MARK: - Internal Properties
     
     @Published var code: String = ""
-    @Published var isLoading: Bool = false
-    @Published var errorMessage: String? = nil
-    @Published var isErrorMessagePresented: Bool = false
     
     // MARK: - Init
     
@@ -21,28 +18,21 @@ final class ColloquiumJoinViewModelImpl: ColloquiumJoinViewModel {
     
     func joinColloquium() {
         guard !code.isEmpty else {
-            errorMessage = "Введите код"
-            isErrorMessagePresented = true
+            ToastService.showError(ColloquiumJoinError.invalidCode.description)
             return
         }
         
-        isLoading = true
-        errorMessage = nil
-        isErrorMessagePresented = false
-        
-        Task {
+        joinColloquiumTask = Task {
             do {
-                let colloquiumId = try await interactor.joinColloquium(with: code)
-                router.routeTo(.colloquium(colloquiumId))
+                let colloqId = try await interactor.validateColloqiumCode(code)
+                router.routeTo(.colloquium(colloqId))
             } catch let error as ColloquiumJoinError {
-                errorMessage = error.title
-                isErrorMessagePresented = true
+                ToastService.showError(error.description)
+                print(error)
             } catch {
-                errorMessage = ColloquiumJoinStrings.unknownError
-                isErrorMessagePresented = true
+                ToastService.showError(ColloquiumJoinError.unknown.description)
+                print(error)
             }
-            
-            isLoading = false
         }
     }
     
@@ -50,4 +40,6 @@ final class ColloquiumJoinViewModelImpl: ColloquiumJoinViewModel {
     
     private let interactor: ColloquiumJoinInteractor
     private let router: ColloquiumJoinRouter
+    
+    private var joinColloquiumTask: Task<Void, Error>?
 }

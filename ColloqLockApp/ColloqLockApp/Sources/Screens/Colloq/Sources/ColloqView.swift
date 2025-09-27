@@ -12,6 +12,7 @@ protocol ColloqViewModel: ObservableObject {
     var remainingTime: TimeInterval { get }
     
     func onAppear()
+    func onDismiss()
     func goNext()
     func goBack()
     func goToIndex(index: Int)
@@ -65,7 +66,9 @@ struct ColloqView<ViewModel: ColloqViewModel>: View {
     
     private var header: some View {
         HStack {
-            Button(action: { }) {
+            Button(action: {
+                viewModel.onDismiss()
+            }) {
                 Images.SystemImages.chevronLeft
                     .foregroundStyle(Colors.buttonStroke)
             }

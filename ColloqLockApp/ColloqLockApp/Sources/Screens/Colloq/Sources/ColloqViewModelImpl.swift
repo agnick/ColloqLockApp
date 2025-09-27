@@ -33,6 +33,10 @@ final class ColloqViewModelImpl: ColloqViewModel {
     
     // MARK: - Public Methods
     
+    func onDismiss() {
+        router.dismiss()
+    }
+    
     func goNext() {
         currentIndex = (currentIndex + 1) % questions.count
     }

@@ -33,13 +33,6 @@ final class AuthServiceImpl: AuthService {
     func start(onChange: @escaping (AuthState) -> Void) {
         self.stateChanged = onChange
 
-        if let user = Auth.auth().currentUser {
-            
-            onChange(.signedIn(user))
-        } else {
-            onChange(.signedOut)
-        }
-
         authHandle = Auth.auth().addStateDidChangeListener { [weak self] _, user in
             guard let self else { return }
             if let user {
