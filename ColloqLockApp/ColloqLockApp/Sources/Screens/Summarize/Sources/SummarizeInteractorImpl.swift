@@ -7,6 +7,7 @@ protocol SummarizeInteractor {
     func getTestAnswers() async throws -> [TestAnswerDto]
     func getOpenQuestions() async throws -> [OpenQuestionDto]
     func getOpenAnswers() async throws -> [OpenAnswerDto]
+    func saveAnswers(testAnswers: [TestAnswerDto], openAnswers: [OpenAnswerDto]) async throws
 }
 
 final class SummarizeInteractorImpl: SummarizeInteractor {
@@ -86,6 +87,54 @@ final class SummarizeInteractorImpl: SummarizeInteractor {
             return OpenAnswerDto(questionId: questionId, answer: answer)
         }
     }
+    
+    func saveAnswers(
+        testAnswers: [TestAnswerDto],
+        openAnswers: [OpenAnswerDto]
+    ) async throws {
+        guard let userId else {
+            throw NSError(
+                domain: "SummarizeInteractor",
+                code: 401,
+                userInfo: [NSLocalizedDescriptionKey: "User not authenticated"]
+            )
+        }
+        
+        let docRef = firestore.collection("userTests").document("\(testId)_\(userId)")
+        
+        let testAnswersData: [[String: Any]] = testAnswers.map { dto in
+            var dict: [String: Any] = ["questionId": dto.questionId]
+            if let option = dto.optionAnswer {
+                dict["optionAnswer"] = option
+            }
+            return dict
+        }
+        
+        let openAnswersData: [[String: Any]] = openAnswers.map { dto in
+            var dict: [String: Any] = ["questionId": dto.questionId]
+            if let answer = dto.answer {
+                dict["answer"] = answer
+            }
+            return dict
+        }
+        
+        let data: [String: Any] = [
+            "testId": testId,
+            "userId": userId,
+            "answers": [
+                "testAnswers": testAnswersData,
+                "openAnswers": openAnswersData
+            ],
+            "updatedAt": FieldValue.serverTimestamp()
+        ]
+        
+        do {
+            try await docRef.setData(data, merge: true)
+        } catch {
+            throw error
+        }
+    }
+
 
     // MARK: - Private properties
     private let firestore = Firestore.firestore()

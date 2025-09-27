@@ -9,11 +9,32 @@ final class SummarizeViewModelImpl: SummarizeViewModel {
     @Published var openAnswersTitles: [String] = []
     
     // MARK: - Initialization
-    init(interactor: SummarizeInteractor) {
+    init(interactor: SummarizeInteractor, router: SummarizeRouter) {
         self.interactor = interactor
+        self.router = router
         
         Task {
             await loadData()
+        }
+    }
+    
+    // MARK: - Public
+    
+    func sendAnswers() {
+        Task {
+            do {
+                let testAnswers = try await interactor.getTestAnswers()
+                let openAnswers = try await interactor.getOpenAnswers()
+                
+                try await interactor.saveAnswers(
+                    testAnswers: testAnswers,
+                    openAnswers: openAnswers
+                )
+                
+                router.routeToProfileScreen()
+            } catch {
+                print(error)
+            }
         }
     }
     
@@ -56,4 +77,5 @@ final class SummarizeViewModelImpl: SummarizeViewModel {
     
     // MARK: - Private properties
     private let interactor: SummarizeInteractor
+    private let router: SummarizeRouter
 }

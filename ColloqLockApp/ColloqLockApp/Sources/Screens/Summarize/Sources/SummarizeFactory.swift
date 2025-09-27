@@ -14,7 +14,8 @@ struct SummarizeFactoryImpl: SummarizeFactory {
     // MARK: - Public functions
     func makeSummarizeScreen(testId: String) -> UIViewController {
         let interactor = SummarizeInteractorImpl(testId: testId)
-        let viewModel = SummarizeViewModelImpl(interactor: interactor)
+        let router = SummarizeRouterImpl(appRouter: externalDeps.appRouter, profileFactory: externalDeps.profileFactory)
+        let viewModel = SummarizeViewModelImpl(interactor: interactor, router: router)
         let rootView = SummarizeView(viewModel: viewModel)
         let viewController = UIHostingController(rootView: rootView)
         return viewController

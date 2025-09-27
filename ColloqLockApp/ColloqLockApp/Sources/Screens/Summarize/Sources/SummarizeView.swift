@@ -6,6 +6,8 @@ protocol SummarizeViewModel: ObservableObject {
     var testAnswersTitles: [String] { get }
     var openQuestionsTitles: [String] { get }
     var openAnswersTitles: [String] { get }
+    
+    func sendAnswers()
 }
 
 struct SummarizeView<ViewModel: SummarizeViewModel>: View {
@@ -45,7 +47,7 @@ struct SummarizeView<ViewModel: SummarizeViewModel>: View {
                 model: MainActionButtonView.Model(
                     text: SummarizeStrings.endColloqButtonText,
                     textAlignment: .center,
-                    action: {}
+                    action: { viewModel.sendAnswers() }
                 )
             )
             .frame(width: Layout.Button.endButtonWidth, height: Layout.Button.size)
