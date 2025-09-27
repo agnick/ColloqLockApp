@@ -1,36 +1,54 @@
 import Foundation
+import FirebaseFirestore
 
 protocol ColloquiumJoinInteractor {
-    func joinColloquium(with code: String) async throws -> String
+    func validateColloqiumCode(_ code: String) async throws -> String
 }
 
 final class ColloquiumJoinInteractorImpl: ColloquiumJoinInteractor {
     
-    // MARK: - Mock Data
-    
-    private let mockColloquiums = [
-        "1234": "colloquium_1",
-        "ABCDEF": "colloquium_2",
-        "789012": "colloquium_3"
-    ]
-    
     // MARK: - Public Methods
     
-    func joinColloquium(with code: String) async throws -> String {
-        // Имитация сетевой задержки
-        try await Task.sleep(nanoseconds: 1_000_000_000) // 1 секунда
-        
-        let cleanedCode = code.uppercased().trimmingCharacters(in: .whitespaces)
-        
-        guard cleanedCode.count == 4 else {
-            throw ColloquiumJoinError.invalidCode
+    func validateColloqiumCode(_ code: String) async throws -> String {
+        do {
+            let snapshot = try await firestore
+                .collection(FirestoreCollections.tests)
+                .whereField("accessCode", isEqualTo: code)
+                .getDocuments()
+            
+            print(snapshot.documents)
+                    
+            guard let doc = snapshot.documents.first else {
+                throw ColloquiumJoinError.codeNotFound
+            }
+                    
+            let data = doc.data()
+            let now = Date()
+                    
+            if let startTime = data["startTime"] as? Timestamp {
+                let startDate = startTime.dateValue()
+                if now < startDate {
+                    throw ColloquiumJoinError.colloquiumNotStarted
+                }
+            }
+                    
+            if let endTime = data["endTime"] as? Timestamp {
+                let endDate = endTime.dateValue()
+                if now > endDate {
+                    throw ColloquiumJoinError.colloquiumEnded
+                }
+            }
+                    
+            return doc.documentID
+        } catch let error as ColloquiumJoinError {
+            throw error
+        } catch {
+            throw ColloquiumJoinError.networkError
         }
-        
-        guard let colloquiumId = mockColloquiums[cleanedCode] else {
-            throw ColloquiumJoinError.codeNotFound
-        }
-        
-        return colloquiumId
     }
+    
+    // MARK: - Private Properties
+    
+    private let firestore = Firestore.firestore()
 }
 

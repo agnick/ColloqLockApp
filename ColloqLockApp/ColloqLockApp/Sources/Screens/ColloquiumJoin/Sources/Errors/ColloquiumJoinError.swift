@@ -1,7 +1,7 @@
 import Foundation
 import FirebaseFirestore
 
-enum ColloquiumJoinError: Error {
+enum ColloquiumJoinError: CustomStringConvertible, Error {    
     case invalidCode
     case codeNotFound
     case colloquiumEnded
@@ -10,7 +10,7 @@ enum ColloquiumJoinError: Error {
     case networkError
     case unknown
     
-    var title: String {
+    var description: String {
         switch self {
         case .invalidCode: "Некорректный код"
         case .codeNotFound: "Коллоквиум не найден"

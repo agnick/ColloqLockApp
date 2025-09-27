@@ -20,7 +20,6 @@
 public enum ColloqLockAppAsset: Sendable {
   public enum Assets {
   public static let accentColor = ColloqLockAppColors(name: "AccentColor")
-    public static let accentColor = ColloqLockAppColors(name: "AccentColor")
     public static let backgroundPrimary = ColloqLockAppColors(name: "BackgroundPrimary")
     public static let backgroundSecondary = ColloqLockAppColors(name: "BackgroundSecondary")
     public static let buttonPrimary = ColloqLockAppColors(name: "ButtonPrimary")

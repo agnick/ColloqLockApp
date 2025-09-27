@@ -4,7 +4,6 @@ protocol ProfileRouter {
 }
 
 enum ProfileRouterDestination {
-    case authScreen
     case colloqJoin
     case colloqCreation
 }
@@ -29,9 +28,6 @@ final class ProfileRouterImpl: ProfileRouter {
     
     func routeTo(_ destination: ProfileRouterDestination) {
         switch destination {
-        case .authScreen:
-            let authorizationVC = authorizationFactory.makeAuthorizationScreen()
-            appRouter.setRoot(authorizationVC, animated: true)
         case .colloqCreation:
             break
         case .colloqJoin:

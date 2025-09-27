@@ -30,29 +30,64 @@ final class ProfileViewModelImpl: ProfileViewModel {
         onAppearTask = Task {
             defer { isLoading = false }
             do {
-                guard let userProfile = try await interactor.loadProfile() else {
-                    return
-                }
-                
-                username = userProfile.displayName
-                userRole = userProfile.role
+                let userProfileData = try await interactor.loadProfile()
+            
+                username = userProfileData.displayName
+                userRole = userProfileData.role
                 
                 colloqs = try await interactor.loadColloqs()
+            } catch let error as ProfileError {
+                ToastService.showError(error.description)
+                print(error)
             } catch {
-                print("Load data error: \(error)")
+                ToastService.showError(ProfileError.unknown.description)
+                print(error)
+            }
+        }
+    }
+    
+    func onColloqsRefresh() {
+        onColloqsRefreshTask?.cancel()
+        
+        onColloqsRefreshTask = Task {
+            do {
+                colloqs = try await interactor.loadColloqs()
+            } catch let error as ProfileError {
+                ToastService.showError(error.description)
+                print(error)
+            } catch {
+                ToastService.showError(ProfileError.unknown.description)
+                print(error)
             }
         }
     }
     
     func onChangeProfile() {
+        onChangeProfileTask?.cancel()
         
+        if username.isEmpty {
+            ToastService.showError(ProfileError.nameIsEmpty.description)
+            return
+        }
+        
+        onChangeProfileTask = Task {
+            do {
+                try await interactor.changeUserProfile(with: username)
+            } catch let error as ProfileError {
+                ToastService.showError(error.description)
+                print(error)
+            } catch {
+                ToastService.showError(ProfileError.unknown.description)
+                print(error)
+            }
+        }
     }
     
     func signOut() {
         do {
             try interactor.signOut()
-            router.routeTo(.authScreen)
         } catch {
+            ToastService.showError(ProfileError.unknown.description)
             print(error)
         }
     }
@@ -67,4 +102,6 @@ final class ProfileViewModelImpl: ProfileViewModel {
     private let router: ProfileRouter
     
     private var onAppearTask: Task<Void, Never>?
+    private var onChangeProfileTask: Task<Void, Never>?
+    private var onColloqsRefreshTask: Task<Void, Never>?
 }

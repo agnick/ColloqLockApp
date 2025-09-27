@@ -47,18 +47,24 @@ final class AuthorizationViewModelImpl: AuthorizationViewModel {
     // MARK: - Private Methods
     
     private func signInAnonimously() {
-        Task {
+        signInAnonimouslyTask?.cancel()
+        
+        signInAnonimouslyTask = Task {
             do {
                 let user = try await interactor.signInAnonymously()
                 try interactor.saveUserData(SaveUserModel(user: user, userRole: userRole))
             } catch let error as AuthorizationError {
+                print(error)
+            } catch {
                 print(error)
             }
         }
     }
     
     private func signUpWithMail() {
-        Task {
+        signUpWithMailTask?.cancel()
+        
+        signUpWithMailTask = Task {
             do {
                 let user = try await interactor.signUpWithMail(MailSignModel(
                     email: email,
@@ -67,12 +73,16 @@ final class AuthorizationViewModelImpl: AuthorizationViewModel {
                 try interactor.saveUserData(SaveUserModel(user: user, userRole: userRole))
             } catch let error as AuthorizationError {
                 print(error)
+            } catch {
+                print(error)
             }
         }
     }
     
     private func signInWithMail() {
-        Task {
+        signInWithMailTask?.cancel()
+        
+        signInWithMailTask = Task {
             do {
                 try await interactor.signInWithMail(MailSignModel(
                     email: email,
@@ -80,16 +90,22 @@ final class AuthorizationViewModelImpl: AuthorizationViewModel {
                 ))
             } catch let error as AuthorizationError {
                 print(error)
+            } catch {
+                print(error)
             }
         }
     }
     
     private func signInWithGoogle() {
-        Task {
+        signInWithGoogleTask?.cancel()
+        
+        signInWithGoogleTask = Task {
             do {
                 let user = try await interactor.signInWithGoogle()
                 try interactor.saveUserData(SaveUserModel(user: user, userRole: userRole))
             } catch let error as AuthorizationError {
+                print(error)
+            } catch {
                 print(error)
             }
         }
@@ -98,4 +114,9 @@ final class AuthorizationViewModelImpl: AuthorizationViewModel {
     // MARK: - Private Properties
     
     private let interactor: AuthorizationInteractor
+    
+    private var signInAnonimouslyTask: Task<Void, Never>?
+    private var signUpWithMailTask: Task<Void, Never>?
+    private var signInWithMailTask: Task<Void, Never>?
+    private var signInWithGoogleTask: Task<Void, Never>?
 }
