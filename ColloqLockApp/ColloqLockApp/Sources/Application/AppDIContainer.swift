@@ -13,6 +13,7 @@ final class AppDIContainer {
     
     let appRouter: AppRouter
     let authService: AuthService = AuthServiceImpl()
+    let colloqService: ColloqService = ColloqServiceImpl()
     
     // MARK: - Factories
     
@@ -57,7 +58,8 @@ final class AppDIContainer {
     
     lazy var colloqFactory: ColloqFactory = {
         ColloqFactoryImpl(externalDeps: ColloqExternalDeps(
-            appRouter: appRouter
+            appRouter: appRouter,
+            colloqService: colloqService
         ))
     }()
 }

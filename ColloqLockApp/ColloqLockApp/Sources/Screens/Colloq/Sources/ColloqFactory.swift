@@ -19,7 +19,7 @@ struct ColloqFactoryImpl: ColloqFactory {
         let router = ColloqRouterImpl(
             appRouter: externalDeps.appRouter
         )
-        let interactor = ColloqInteractorImpl()
+        let interactor = ColloqInteractorImpl(colloqService: externalDeps.colloqService, userID: id)
         let viewModel = ColloqViewModelImpl(interactor: interactor, router: router, id: id)
         let rootView = ColloqView(viewModel: viewModel)
         let viewController = UIHostingController(rootView: rootView)

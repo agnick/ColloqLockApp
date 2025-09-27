@@ -2,56 +2,31 @@ import Foundation
 
 protocol ColloqInteractor {
     func loadQuestions() async throws -> [ColloqQuestionModel]?
+    func loadAnswers(for id: String) async throws -> [ColloqAnswerModel]?
+    func saveAnswer(for id: String, index: Int, answer: ColloqAnswerModel) async throws
 }
 
 final class ColloqInteractorImpl: ColloqInteractor {
     
-    func loadQuestions() async throws -> [ColloqQuestionModel]? {
-        return [
-            ColloqQuestionModel(type: .open, text: "Расскажи о себе", options: nil),
-            ColloqQuestionModel(type: .pick2, text: "Выбери один вариант", options: ["Вариант 1", "Вариант 2"]),
-            ColloqQuestionModel(type: .pick4, text: "Выбери несколько вариантов", options: ["Вариант 1Вариант 1Вариант 1", "B", "C", "D"]),
-            ColloqQuestionModel(type: .open, text: "Расскажи о себе", options: nil),
-            ColloqQuestionModel(type: .pick2, text: "Выбери один вариант", options: ["Вариант 1", "Вариант 2"]),
-            ColloqQuestionModel(type: .pick4, text: "Выбери несколько вариантов", options: ["A", "B", "C", "D"]),
-            ColloqQuestionModel(type: .open, text: "Расскажи о себе", options: nil),
-            ColloqQuestionModel(type: .pick2, text: "Выбери один вариант", options: ["Вариант 1", "Вариант 2"]),
-            ColloqQuestionModel(type: .pick4, text: "Выбери несколько вариантов", options: ["A", "B", "C", "D"]),
-            ColloqQuestionModel(type: .open, text: "Расскажи о себе", options: nil),
-            ColloqQuestionModel(type: .pick2, text: "Выбери один вариант", options: ["Вариант 1", "Вариант 2"]),
-            ColloqQuestionModel(type: .pick4, text: "Выбери несколько вариантов", options: ["A", "B", "C", "D"]),
-            ColloqQuestionModel(type: .open, text: "Расскажи о себе", options: nil),
-            ColloqQuestionModel(type: .pick2, text: "Выбери один вариант", options: ["Вариант 1", "Вариант 2"]),
-            ColloqQuestionModel(type: .pick4, text: "Выбери несколько вариантов", options: ["A", "B", "C", "D"]),
-            ColloqQuestionModel(type: .open, text: "Расскажи о себе", options: nil),
-            ColloqQuestionModel(type: .pick2, text: "Выбери один вариант", options: ["Вариант 1", "Вариант 2"]),
-            ColloqQuestionModel(type: .pick4, text: "Выбери несколько вариантов", options: ["A", "B", "C", "D"]),
-            ColloqQuestionModel(type: .open, text: "Расскажи о себе", options: nil),
-            ColloqQuestionModel(type: .pick2, text: "Выбери один вариант", options: ["Вариант 1", "Вариант 2"]),
-            ColloqQuestionModel(type: .pick4, text: "Выбери несколько вариантов", options: ["A", "B", "C", "D"]),
-            ColloqQuestionModel(type: .open, text: "Расскажи о себе", options: nil),
-            ColloqQuestionModel(type: .pick2, text: "Выбери один вариант", options: ["Вариант 1", "Вариант 2"]),
-            ColloqQuestionModel(type: .pick4, text: "Выбери несколько вариантов", options: ["A", "B", "C", "D"]),
-            ColloqQuestionModel(type: .open, text: "Расскажи о себе", options: nil),
-            ColloqQuestionModel(type: .pick2, text: "Выбери один вариант", options: ["Вариант 1", "Вариант 2"]),
-            ColloqQuestionModel(type: .pick4, text: "Выбери несколько вариантов", options: ["A", "B", "C", "D"]),
-            ColloqQuestionModel(type: .open, text: "Расскажи о себе", options: nil),
-            ColloqQuestionModel(type: .pick2, text: "Выбери один вариант", options: ["Вариант 1", "Вариант 2"]),
-            ColloqQuestionModel(type: .pick4, text: "Выбери несколько вариантов", options: ["A", "B", "C", "D"]),
-            ColloqQuestionModel(type: .open, text: "Расскажи о себе", options: nil),
-            ColloqQuestionModel(type: .pick2, text: "Выбери один вариант", options: ["Вариант 1", "Вариант 2"]),
-            ColloqQuestionModel(type: .pick4, text: "Выбери несколько вариантов", options: ["A", "B", "C", "D"]),
-            ColloqQuestionModel(type: .open, text: "Расскажи о себе", options: nil),
-            ColloqQuestionModel(type: .pick2, text: "Выбери один вариант", options: ["Вариант 1", "Вариант 2"]),
-            ColloqQuestionModel(type: .pick4, text: "Выбери несколько вариантов", options: ["A", "B", "C", "D"]),
-            ColloqQuestionModel(type: .open, text: "Расскажи о себе", options: nil),
-            ColloqQuestionModel(type: .pick2, text: "Выбери один вариант", options: ["Вариант 1", "Вариант 2"]),
-            ColloqQuestionModel(type: .pick4, text: "Выбери несколько вариантов", options: ["A", "B", "C", "D"]),
-            ColloqQuestionModel(type: .open, text: "Расскажи о себе", options: nil)
-        ]
+    private let colloqService: ColloqService
+    private let userID: String
+    
+    init(colloqService: ColloqService, userID: String) {
+        self.colloqService = colloqService
+        self.userID = userID
     }
     
-    func submitAnswers(_ answers: [ColloqAnswerModel]) async throws {
-
+    func loadQuestions() async throws -> [ColloqQuestionModel]? {
+        try await colloqService.fetchQuestions()
     }
+    
+    func loadAnswers(for id: String) async throws -> [ColloqAnswerModel]? {
+        try await colloqService.fetchAnswers(userId: id)
+    }
+    
+    func saveAnswer(for id: String, index: Int, answer: ColloqAnswerModel) async throws {
+        try await colloqService.saveAnswer(userId: id, index: index, answer: answer)
+    }
+    
+    
 }
