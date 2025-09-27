@@ -16,12 +16,14 @@ final class ProfileRouterImpl: ProfileRouter {
         appRouter: AppRouter,
         authorizationFactory: AuthorizationFactory,
         colloquiumJoinFactory: ColloquiumJoinFactory,
-        colloqCreationFactory: ColloqCreationFactory
+        colloqCreationFactory: ColloqCreationFactory,
+        userId: String
     ) {
         self.appRouter = appRouter
         self.authorizationFactory = authorizationFactory
         self.colloquiumJoinFactory = colloquiumJoinFactory
         self.colloqCreationFactory = colloqCreationFactory
+        self.userId = userId
     }
     
     // MARK: - Public Methods
@@ -31,7 +33,7 @@ final class ProfileRouterImpl: ProfileRouter {
         case .colloqCreation:
             break
         case .colloqJoin:
-            let colloqJoinVC = colloquiumJoinFactory.makeColloquiumJoinScreen()
+            let colloqJoinVC = colloquiumJoinFactory.makeColloquiumJoinScreen(userId: userId)
             appRouter.push(colloqJoinVC, animated: true)
         }
     }
@@ -42,4 +44,5 @@ final class ProfileRouterImpl: ProfileRouter {
     private let authorizationFactory: AuthorizationFactory
     private let colloquiumJoinFactory: ColloquiumJoinFactory
     private let colloqCreationFactory: ColloqCreationFactory
+    private let userId: String
 }

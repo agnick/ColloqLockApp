@@ -9,8 +9,7 @@ final class ColloqViewModelImpl: ColloqViewModel {
     @Published var answers: [ColloqAnswerModel] = []
     @Published var isLoading: Bool = true
     @Published var remainingTime: TimeInterval = 3600
-    
-    private var id: String
+
     private let quizDuration: TimeInterval = 3600
     private var startDate: Date?
     private var timer: Timer?
@@ -25,10 +24,9 @@ final class ColloqViewModelImpl: ColloqViewModel {
     
     // MARK: - Init
     
-    init(interactor: ColloqInteractor, router: ColloqRouter, id: String) {
+    init(interactor: ColloqInteractor, router: ColloqRouter) {
         self.interactor = interactor
         self.router = router
-        self.id = id
     }
     
     // MARK: - Public Methods
@@ -55,10 +53,12 @@ final class ColloqViewModelImpl: ColloqViewModel {
     
     func markAnswered() {
         questions[currentIndex].isAnswered = true
+        saveAnswer(index: currentIndex)
     }
     
     func markUnanswered() {
-        questions[currentIndex].isAnswered = true
+        questions[currentIndex].isAnswered = false
+        saveAnswer(index: currentIndex)
     }
     
     func onAppear() {
@@ -68,16 +68,20 @@ final class ColloqViewModelImpl: ColloqViewModel {
         onAppearTask = Task {
             defer { isLoading = false }
             do {
-                guard let colloqQuestions = try await interactor.loadQuestions() else {
-                    return
-                }
-                
+                guard let colloqQuestions = try await interactor.loadQuestions() else { return }
                 questions = colloqQuestions
-                self.answers = questions.map { question in
-                    switch question.type {
-                    case .open: return .open("")
-                    case .pick2: return .pick2(nil)
-                    case .pick4: return .pick4([])
+
+                let savedAnswers = try await interactor.loadAnswers()
+                
+                self.answers = if let savedAnswers {
+                    savedAnswers
+                } else {
+                    questions.map { q in
+                        switch q.type {
+                        case .open: .open("")
+                        case .pick2: .pick2(nil)
+                        case .pick4: .pick4([])
+                        }
                     }
                 }
                 
@@ -88,6 +92,17 @@ final class ColloqViewModelImpl: ColloqViewModel {
                 
             } catch {
                 print("Load data error: \(error)")
+            }
+        }
+    }
+    
+    private func saveAnswer(index: Int) {
+        let answer = answers[index]
+        Task {
+            do {
+                try await interactor.saveAnswer(index: index, answer: answer)
+            } catch {
+                print("Failed to save answer: \(error)")
             }
         }
     }

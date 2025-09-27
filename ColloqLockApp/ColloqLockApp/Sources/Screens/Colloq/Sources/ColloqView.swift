@@ -446,18 +446,5 @@ struct ColloqView<ViewModel: ColloqViewModel>: View {
         
     }
     
-    // MARK: - Constants
-    
-    fileprivate enum Constants {
-        // sizes
-        
-        // paddings
-        
-        // fonts
-        
-        // other properties
-        
-    }
-    
 }
 

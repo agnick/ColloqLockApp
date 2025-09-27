@@ -2,7 +2,7 @@ import SwiftUI
 
 @MainActor
 protocol ColloqFactory {
-    func makeColloqScreen(id: String) -> UIViewController
+    func makeColloqScreen(userId: String, testId: String) -> UIViewController
 }
 
 struct ColloqFactoryImpl: ColloqFactory {
@@ -15,12 +15,12 @@ struct ColloqFactoryImpl: ColloqFactory {
     
     // MARK: - Public Methods
     
-    func makeColloqScreen(id: String) -> UIViewController {
+    func makeColloqScreen(userId: String, testId: String) -> UIViewController {
         let router = ColloqRouterImpl(
             appRouter: externalDeps.appRouter
         )
-        let interactor = ColloqInteractorImpl()
-        let viewModel = ColloqViewModelImpl(interactor: interactor, router: router, id: id)
+        let interactor = ColloqInteractorImpl(colloqService: externalDeps.colloqService, testId: testId, userId: userId)
+        let viewModel = ColloqViewModelImpl(interactor: interactor, router: router)
         let rootView = ColloqView(viewModel: viewModel)
         let viewController = UIHostingController(rootView: rootView)
         return viewController

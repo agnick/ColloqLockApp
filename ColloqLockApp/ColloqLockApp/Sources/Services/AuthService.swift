@@ -10,6 +10,8 @@ protocol AuthService {
     var currentUser: User? { get }
     func start(onChange: @escaping (AuthState) -> Void)
     func signOut() throws
+    var currentUserID: String? { get }
+    
 }
 
 final class AuthServiceImpl: AuthService {
@@ -51,4 +53,10 @@ final class AuthServiceImpl: AuthService {
     
     private var authHandle: AuthStateDidChangeListenerHandle?
     private var stateChanged: ((AuthState) -> Void)?
+}
+
+extension AuthServiceImpl {
+    var currentUserID: String? {
+        return currentUser?.uid
+    }
 }

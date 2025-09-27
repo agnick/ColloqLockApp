@@ -2,7 +2,7 @@ import SwiftUI
 
 @MainActor
 protocol ColloquiumJoinFactory {
-    func makeColloquiumJoinScreen() -> UIViewController
+    func makeColloquiumJoinScreen(userId: String) -> UIViewController
 }
 
 struct ColloquiumJoinFactoryImpl: ColloquiumJoinFactory {
@@ -15,10 +15,10 @@ struct ColloquiumJoinFactoryImpl: ColloquiumJoinFactory {
     
     // MARK: - Public Methods
     
-    func makeColloquiumJoinScreen() -> UIViewController {
+    func makeColloquiumJoinScreen(userId: String) -> UIViewController {
         let interactor = ColloquiumJoinInteractorImpl()
         let router = ColloquiumJoinRouterImpl(appRouter: externalDeps.appRouter, colloqFactory: externalDeps.colloqFactory)
-        let viewModel = ColloquiumJoinViewModelImpl(interactor: interactor, router: router)
+        let viewModel = ColloquiumJoinViewModelImpl(interactor: interactor, router: router, userId: userId)
         let rootView = ColloquiumJoinView(viewModel: viewModel)
         let viewController = UIHostingController(rootView: rootView)
         return viewController

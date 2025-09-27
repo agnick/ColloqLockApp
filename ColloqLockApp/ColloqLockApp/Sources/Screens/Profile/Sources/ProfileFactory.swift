@@ -9,8 +9,9 @@ struct ProfileFactoryImpl: ProfileFactory {
     
     // MARK: - Init
 
-    init(externalDeps: ProfileExternalDeps) {
+    init(externalDeps: ProfileExternalDeps, userId: String) {
         self.externalDeps = externalDeps
+        self.userId = userId
     }
     
     // MARK: - Public Methods
@@ -20,7 +21,8 @@ struct ProfileFactoryImpl: ProfileFactory {
             appRouter: externalDeps.appRouter,
             authorizationFactory: externalDeps.authorizationFactory,
             colloquiumJoinFactory: externalDeps.colloquiumJoinFactory,
-            colloqCreationFactory: externalDeps.colloqCreationFactory
+            colloqCreationFactory: externalDeps.colloqCreationFactory,
+            userId: userId
         )
         let interactor = ProfileInteractorImpl(authService: externalDeps.authService)
         let viewModel = ProfileViewModelImpl(interactor: interactor, router: router)
@@ -32,4 +34,5 @@ struct ProfileFactoryImpl: ProfileFactory {
     // MARK: - Private Properties
 
     private let externalDeps: ProfileExternalDeps
+    private let userId: String
 }
