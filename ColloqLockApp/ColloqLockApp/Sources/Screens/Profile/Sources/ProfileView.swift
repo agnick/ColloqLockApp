@@ -14,6 +14,7 @@ protocol ProfileViewModel: ObservableObject {
     func onChangeProfile()
     func signOut()
     func joinColloq()
+    func onColloqsRefresh()
 }
 
 struct ProfileView<ViewModel: ProfileViewModel>: View {
@@ -80,6 +81,10 @@ struct ProfileView<ViewModel: ProfileViewModel>: View {
                 
                 Button(action: {
                     withAnimation {
+                        if viewModel.isEditing {
+                            viewModel.onChangeProfile()
+                        }
+                        
                         viewModel.isEditing.toggle()
                         if viewModel.username.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                             viewModel.username = ProfileStrings.username
@@ -113,15 +118,15 @@ struct ProfileView<ViewModel: ProfileViewModel>: View {
     }
     
     private var colloqJoin: some View {
-        Button(
+        MainActionButtonView(model: MainActionButtonView.Model(
+            text: ProfileStrings.joinColloq,
+            textAlignment: .leading,
             action: {
                 viewModel.joinColloq()
-            },
-            label: {
-                Text("Войти в коллоквиум")
             }
-        )
-        .buttonStyle(.bordered)
+        ))
+        .padding(.vertical, 15)
+        .padding(.horizontal, 40)
     }
     
     private var colloqCreate: some View {
@@ -144,7 +149,6 @@ struct ProfileView<ViewModel: ProfileViewModel>: View {
             
             Spacer()
         }
-        .padding(.top, Constants.listLabelTop)
         .padding(.leading, Constants.listLabelLeading)
     }
     
@@ -162,6 +166,9 @@ struct ProfileView<ViewModel: ProfileViewModel>: View {
         }
         .listStyle(PlainListStyle())
         .scrollContentBackground(.hidden)
+        .refreshable {
+            viewModel.onColloqsRefresh()
+        }
         .frame(maxWidth: .infinity)
     }
     

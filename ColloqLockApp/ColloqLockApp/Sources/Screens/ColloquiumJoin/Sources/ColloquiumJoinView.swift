@@ -3,9 +3,6 @@ import SwiftUI
 @MainActor
 protocol ColloquiumJoinViewModel: ObservableObject {
     var code: String { get set }
-    var isLoading: Bool { get set }
-    var errorMessage: String? { get set }
-    var isErrorMessagePresented: Bool { get set }
     
     func joinColloquium()
 }
@@ -24,26 +21,6 @@ struct ColloquiumJoinView<ViewModel: ColloquiumJoinViewModel>: View {
                 .ignoresSafeArea()
             
             VStack {
-                HStack(spacing: 12) {
-                    Image(systemName: "person.circle.fill")
-                        .resizable()
-                        .frame(width: 40, height: 40)
-                        .foregroundColor(.orange)
-                    
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text(ColloquiumJoinStrings.helloUser)
-                            .foregroundStyle(Colors.textPrimary)
-                            .font(.system(size: 24, weight: .semibold))
-                        
-                        Text(ColloquiumJoinStrings.student)
-                            .foregroundStyle(Colors.textSecondary)
-                            .font(.system(size: 16))
-                    }
-                }
-                .padding(.horizontal, 24)
-                .padding(.top, 16) 
-                .frame(maxWidth: .infinity, alignment: .topLeading)
-                
                 Spacer()
                 
                 VStack(spacing: 16) {
@@ -62,7 +39,6 @@ struct ColloquiumJoinView<ViewModel: ColloquiumJoinViewModel>: View {
                 }
                 .padding(.bottom, 15)
                 
-                
                 Spacer()
             }
             .background {
@@ -76,11 +52,6 @@ struct ColloquiumJoinView<ViewModel: ColloquiumJoinViewModel>: View {
         }
         .onAppear {
             isTextFieldFocused = true
-        }
-        .alert(ColloquiumJoinStrings.error, isPresented: $viewModel.isErrorMessagePresented) {
-            Button(ColloquiumJoinStrings.ok, role: .cancel) { }
-        } message: {
-                Text(viewModel.errorMessage ?? "")
         }
     }
     // MARK: - Private Properties
@@ -109,32 +80,31 @@ struct ColloquiumJoinView<ViewModel: ColloquiumJoinViewModel>: View {
         )
         .frame(width: Layout.mainActionButtonWidth,
                height: Layout.mainActionButtonHeight)
-        .disabled(viewModel.code.count < 4)
     }
     
     // MARK: - Private Types
+    
+    private struct CodeDigitView: View {
+        let text: String
+        let isFocused: Bool
+        
+        var body: some View {
+            ZStack {
+                RoundedRectangle(cornerRadius: 10)
+                    .stroke(isFocused ? Color.orange : Color.gray, lineWidth: 2)
+                
+                Text(text)
+                    .font(.system(size: 24, weight: .bold))
+                    .foregroundColor(.white)
+            }
+            .frame(width: 70, height: 55)
+        }
+    }
     
     private enum Layout {
         static var mainTextFieldWidth: CGFloat { 220.0 }
         static var mainTextFieldHeight: CGFloat { 46.0 }
         static var mainActionButtonWidth: CGFloat { 300.0 }
         static var mainActionButtonHeight: CGFloat { 46.0 }
-    }
-}
-
-private struct CodeDigitView: View {
-    let text: String
-    let isFocused: Bool
-    
-    var body: some View {
-        ZStack {
-            RoundedRectangle(cornerRadius: 10)
-                .stroke(isFocused ? Color.orange : Color.gray, lineWidth: 2)
-            
-            Text(text)
-                .font(.system(size: 24, weight: .bold))
-                .foregroundColor(.white)
-        }
-        .frame(width: 70, height: 55)
     }
 }
